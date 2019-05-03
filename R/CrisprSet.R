@@ -1076,7 +1076,7 @@ Return value:
 
   # consensusAlleles -----
   consensusAlleles = function(cig_freqs = .self$cigar_freqs, return_nms = TRUE,
-                              match.ops = c("M","X","=")){
+                              match.ops = c("M","X","="), include_all = FALSE){
 '
 Description:
 Get variants by their cigar string, make the pairwise alignments for the consensus
@@ -1153,13 +1153,16 @@ if return_nms = TRUE
                                             Rpadding.letter = ".")
           
           cm <- consensusMatrix(aln_sqs)
-          sq <- rownames(cm)[apply(cm, 2, which.max)]
-          sq <- paste0(sq[! sq %in% c("-", "+", ".")], collapse = "")
-          seqs[i] <- sq
+          seqs[i] <- if (include_all)
+            Biostrings::consensusString(cm, threshold = 1/length(sqs))
+            else Biostrings::consensusString(cm)
           
         }  else {
           cig <- names(splits[[i]])
-          seqs[i] <- consensusString(sqs)
+          seqs[i] <- if (include_all)
+            Biostrings::consensusString(sqs, threshold = 1/length(sqs))
+            else Biostrings::consensusString(sqs)
+          
           starts[i] <- start[1]
         }
       }
